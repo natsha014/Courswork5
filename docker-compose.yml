@@ -39,7 +39,7 @@ services:
     ports:
       - "81:80"
     volumes:
-      - static_volume:/app/staticfiles
+      - static_volume:/code/staticfiles
     depends_on:
       - web
 
