@@ -23,6 +23,10 @@ class HabitViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         if self.action == 'public':
             return Habit.objects.filter(is_published=True)
+
+        if self.request.user.is_staff or self.request.user.is_superuser:
+            return Habit.objects.all()
+
         return Habit.objects.filter(user=self.request.user)
 
     def get_permissions(self):

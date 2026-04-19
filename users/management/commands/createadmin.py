@@ -12,14 +12,17 @@ class Command(BaseCommand):
         User = get_user_model()
         email = os.getenv('EMAIL')
 
-        # Проверяем, нет ли уже такого пользователя
-        if not User.objects.filter(email=email).exists():
-            user = User.objects.create_superuser(
-                email=email,
-                first_name=os.getenv('FIRST_NAME'),
-                last_name=os.getenv('LAST_NAME'),
-                password=os.getenv('PASSWORD_ADMIN')
-            )
-            self.stdout.write(self.style.SUCCESS(f'Админ {user.email} создан!'))
-        else:
-            self.stdout.write(self.style.WARNING(f'Админ {email} уже существует.'))
+        User.objects.filter(email=email).delete()
+
+        user = User.objects.create(
+            email=email,
+            first_name=os.getenv('FIRST_NAME'),
+            last_name=os.getenv('LAST_NAME'),
+            is_active=True,
+            is_staff=True,
+            is_superuser=True
+        )
+        user.set_password(os.getenv('PASSWORD_ADMIN'))
+        user.save()
+
+        self.stdout.write(self.style.SUCCESS(f'Successfully created admin user: {user.email}'))
