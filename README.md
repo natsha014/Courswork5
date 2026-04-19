@@ -32,25 +32,6 @@
 2. **Настройте переменные окружения:**
 
    Создайте файл `.env` в корне проекта и заполните его по образцу `.env.sample`
-    ```
-    SECRET_KEY=
-    DEBUG=
-    NAME=
-    USER=
-    PASSWORD=
-    HOST=
-    PORT=
-    CORS_ALLOWED_ORIGINS=
-    CSRF_TRUSTED_ORIGINS=
-    ALLOWED_HOSTS=
-    EMAIL=
-    FIRST_NAME=
-    LAST_NAME=
-    PASSWORD_ADMIN=
-    CELERY_BROKER_URL=
-    CELERY_RESULT_BACKEND=
-    TG_API_KEY=
-   ```
 
 
 3. **Установите зависимости (через Poetry):**
@@ -106,9 +87,48 @@
   через Django Signals.
 - **Безопасность:** Доступ к привычкам имеет только их владелец (IsOwner).
 
-## 📖 Документация API
+## 🌐 Деплой и удаленный сервер
 
-**После запуска сервера документация доступна по адресам:**
+Проект развернут на удаленном сервере и настроен на автоматический деплой при каждом `push`
 
-- `Swagger: 127.0.0.1`
-- `ReDoc: 127.0.0.1`
+**Адрес сервера:** `http://81.26.180.221:81`
+
+**Документация (Swagger):** `http://81.26.180.221:81/swagger/`
+
+### Настройка удаленного сервера (Ubuntu)
+
+1. Установите Docker и Docker Compose:
+   ```bash
+   sudo apt update && sudo apt install docker.io docker-compose-v2 -y
+    ```
+
+2. Настройте права доступа для управления Docker без sudo:
+    ```bash
+    sudo usermod -aG docker $USER
+    sudo chmod 666 /var/run/docker.sock
+   ```
+
+3. Настройка `CI/CD (GitHub Actions)`
+
+   Для работы автоматического деплоя в репозитории настроены следующие GitHub Secrets:
+
+   `DOCKER_HUB_USERNAME / DOCKER_HUB_ACCESS_TOKEN` — логин и токен Docker Hub
+
+   `SERVER_IP` — IP-адрес сервера
+
+   `SSH_USER` — пользователь сервера
+
+   `SSH_KEY` — приватный SSH-ключ (содержимое файла id_rsa)
+
+   `DEPLOY_DIR` — путь к папке проекта на сервере
+
+
+4. Запуск через Docker (локально или на сервере)
+
+   Проект полностью контейнеризирован. Для запуска всех сервисов (Django, Postgres, Redis, Celery, Celery Beat, Nginx)
+   используйте:
+
+    ```bash
+    docker compose up -d --build
+   ```
+   
