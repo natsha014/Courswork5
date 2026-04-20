@@ -2,6 +2,7 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 from habits.models import Habit
 from users.models import User
+from datetime import timedelta, time
 
 
 class HabitTestCase(APITestCase):
@@ -18,12 +19,12 @@ class HabitTestCase(APITestCase):
         """Тест создания полезной привычки"""
         data = {
             "place": "Дом",
-            "time": "10:00:00",
+            "time": time(10, 0, 0),
             "action": "Зарядка",
             "is_pleasant": False,
             "period": 1,
             "reward": "Кофе",
-            "time_to_action": "00:01:00"
+            "time_to_action": timedelta(minutes=1)
         }
         response = self.client.post('/habits/', data=data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -34,9 +35,9 @@ class HabitTestCase(APITestCase):
         """Тест: время выполнения не более 120 секунд"""
         data = {
             "place": "Дом",
-            "time": "10:00:00",
+            "time": time(10, 0, 0),
             "action": "Долгое действие",
-            "time_to_action": "00:05:00"  # 300 секунд (больше 120)
+            "time_to_action": timedelta(minutes=5)  # больше 120 c
         }
         response = self.client.post('/habits/', data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -45,7 +46,7 @@ class HabitTestCase(APITestCase):
         """Тест: у приятной привычки не может быть вознаграждения"""
         data = {
             "place": "Дом",
-            "time": "10:00:00",
+            "time": time(10, 0, 0),
             "action": "Фильм",
             "is_pleasant": True,
             "reward": "Шоколадка"  # ОШИБКА по ТЗ
@@ -56,13 +57,15 @@ class HabitTestCase(APITestCase):
     def test_list_habit(self):
         """Тест: пользователь видит только свои привычки"""
         # Создаем привычку для текущего юзера
-        Habit.objects.create(user=self.user, action="Моя", place="X", time="12:00", time_to_action="00:01:00")
+        Habit.objects.create(user=self.user, action="Моя", place="X", time=time(12, 0),
+                             time_to_action=timedelta(minutes=1))
 
         # Создаем другого юзера и его привычку
         other_user = User.objects.create(email="other@test.ru")
         other_user.set_password("password")
         other_user.save()
-        Habit.objects.create(user=other_user, action="Чужая", place="Y", time="12:00", time_to_action="00:01:00")
+        Habit.objects.create(user=other_user, action="Чужая", place="Y", time=time(12, 0),
+                             time_to_action=timedelta(minutes=1))
 
         response = self.client.get('/habits/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
